@@ -1,14 +1,31 @@
-import { Table, TableProps } from "antd";
-import { SearchProps } from "antd/es/input";
+import { Table } from "antd";
+import type { TableProps } from "antd";
+import type { SearchProps } from "antd/es/input";
 import Search from "antd/es/input/Search";
 import cloneDeep from "lodash/cloneDeep";
-import React, { CSSProperties, memo, useEffect, useState } from "react";
-import type { ReactNode } from "react";
-
+import React, { memo, useEffect, useState } from "react";
+import type { ReactNode, CSSProperties, Dispatch, SetStateAction } from "react";
 export interface CoolTableProps<T extends object> extends TableProps<T> {
   children?: ReactNode;
-  rowSelection?: TableProps<T>["rowSelection"] & {
-    rowKey: TableProps<T>["rowKey"];
+  /**
+   * 选择配置
+   */
+  rowSelection?: Omit<
+    NonNullable<TableProps<T>["rowSelection"]>,
+    "onChange" | "getCheckboxProps"
+  > & {
+    /**配置单选/多选 */
+    type: "checkbox" | "radio";
+    /**配置唯一key值 */
+    rowKey: keyof T & string;
+    /**配置已选中项 */
+    selectRowKeys: React.Key[];
+    /**传入更改选中项key方法 */
+    setSelectRowKeys?: React.Dispatch<React.SetStateAction<React.Key[]>>;
+    /**传入更改选中项record方法 */
+    setSelectRows?: Dispatch<SetStateAction<T[]>>;
+    /**配置不可选条件 */
+    disabled?: (record: T) => boolean;
   };
   /**
    * 搜索框配置
@@ -49,9 +66,22 @@ const CoolTable = function <T extends object>(props: CoolTableProps<T>) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.dataSource]);
 
+  // 勾选选择
+  const rowSelection = props.rowSelection && {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: T[]) => {
+      props.rowSelection?.setSelectRowKeys?.(selectedRowKeys);
+      props.rowSelection?.setSelectRows?.(selectedRows);
+    },
+    getCheckboxProps: (record: T) => ({
+      disabled: props.rowSelection?.disabled?.(record), // Column configuration not to be checked
+    }),
+    ...props.rowSelection,
+  };
+
   const tableProps: TableProps<T> = {
     dataSource: data,
     rowKey: props.rowSelection?.rowKey,
+    rowSelection,
   };
 
   return (
