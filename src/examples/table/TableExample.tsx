@@ -3,6 +3,7 @@ import type { FC, ReactNode } from "react";
 import CoolTable, { CoolTableProps } from "../../components/table/CoolTable";
 import { columns, data } from "./data";
 import type { DataType } from "./data";
+import { Button, Select } from "antd";
 
 interface IProps {
   children?: ReactNode;
@@ -15,30 +16,52 @@ const TableExample: FC<IProps> = () => {
     componentProps: {
       allowClear: true,
     },
+    position: "left",
+    style: {
+      margin: "0 0 0 120px",
+    },
   };
 
   /**配置选择 */
-  const [selectRowKeys, setSelectRowKeys] = useState<React.Key[]>([]);
-  const [selectRows, setSelectRows] = useState<DataType[]>([]);
+  const [selectedRowKeys, setSelectRowKeys] = useState<React.Key[]>([]);
+  const [selectedRows, setSelectedRows] = useState<DataType[]>([]);
   const rowSelection: CoolTableProps<DataType>["rowSelection"] = {
     type: "checkbox",
     rowKey: "age",
-    selectRowKeys,
+    preserveSelectedRowKeys: true, // 用于搜索框搜索改变数据后仍保留选择值
+    selectedRowKeys,
     setSelectRowKeys,
-    setSelectRows,
+    setSelectedRows,
+  };
+  const setSelectedRowNone = () => {
+    setSelectRowKeys([]);
+    setSelectedRows([]);
   };
   useEffect(() => {
-    console.log("selected", selectRowKeys, selectRows);
-  }, [selectRows, selectRowKeys]);
+    console.log("selected", selectedRowKeys, selectedRows);
+  }, [selectedRows, selectedRowKeys]);
+
+  const [dataSource, setDataSource] = useState<DataType[]>([...data]);
 
   const tableProps = {
-    dataSource: data,
+    dataSource,
     columns,
     searchConfig,
     rowSelection,
   };
 
-  return <CoolTable {...tableProps} />;
+  return (
+    <div style={{ position: "relative" }}>
+      <div style={{ position: "absolute", zIndex: 1 }}>
+        <Select></Select>
+      </div>
+      <div style={{ position: "absolute", zIndex: 1, right: 0 }}>
+        <Button onClick={setSelectedRowNone}>重置勾选</Button>
+        <Button onClick={() => setDataSource([...data])}>刷新数据</Button>
+      </div>
+      <CoolTable {...tableProps} />
+    </div>
+  );
 };
 
 export default memo(TableExample);

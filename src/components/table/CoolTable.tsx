@@ -1,4 +1,4 @@
-import { Table } from "antd";
+import { CheckboxProps, Table } from "antd";
 import type { TableProps } from "antd";
 import type { SearchProps } from "antd/es/input";
 import Search from "antd/es/input/Search";
@@ -18,12 +18,14 @@ export interface CoolTableProps<T extends object> extends TableProps<T> {
     type: "checkbox" | "radio";
     /**配置唯一key值 */
     rowKey: keyof T & string;
+    /**设置数据改变后保留选中项，在配置的搜索框的情况下请设为true */
+    preserveSelectedRowKeys?: boolean;
     /**配置已选中项 */
-    selectRowKeys: React.Key[];
+    selectedRowKeys: React.Key[];
     /**传入更改选中项key方法 */
-    setSelectRowKeys?: React.Dispatch<React.SetStateAction<React.Key[]>>;
+    setSelectRowKeys: React.Dispatch<React.SetStateAction<React.Key[]>>;
     /**传入更改选中项record方法 */
-    setSelectRows?: Dispatch<SetStateAction<T[]>>;
+    setSelectedRows?: Dispatch<SetStateAction<T[]>>;
     /**配置不可选条件 */
     disabled?: (record: T) => boolean;
   };
@@ -62,15 +64,18 @@ const CoolTable = function <T extends object>(props: CoolTableProps<T>) {
     },
   };
   useEffect(() => {
+    // 数据源改变时，按原先条件搜索
     searchProps?.onSearch?.(searchValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // 数据源改变时，取消勾选的行
+    props.rowSelection?.setSelectRowKeys([]);
+    props.rowSelection?.setSelectedRows?.([]);
   }, [props.dataSource]);
 
   // 勾选选择
-  const rowSelection = props.rowSelection && {
+  const rowSelection: TableProps<T>["rowSelection"] = props.rowSelection && {
     onChange: (selectedRowKeys: React.Key[], selectedRows: T[]) => {
-      props.rowSelection?.setSelectRowKeys?.(selectedRowKeys);
-      props.rowSelection?.setSelectRows?.(selectedRows);
+      props.rowSelection?.setSelectRowKeys(selectedRowKeys);
+      props.rowSelection?.setSelectedRows?.(selectedRows);
     },
     getCheckboxProps: (record: T) => ({
       disabled: props.rowSelection?.disabled?.(record), // Column configuration not to be checked
