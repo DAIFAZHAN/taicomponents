@@ -4,6 +4,9 @@ import CoolTable, { CoolTableProps } from "../../components/table/CoolTable";
 import { columns, data } from "./data";
 import type { DataType } from "./data";
 import { Button, Select } from "antd";
+import EditableCoolTable from "../../components/table/EditableCoolTable";
+import EditableRowTable from "../../components/table/EditableRowTable";
+import EditableRowExample from "./EditableRowExample";
 
 interface IProps {
   children?: ReactNode;
@@ -27,7 +30,6 @@ const TableExample: FC<IProps> = () => {
   const [selectedRows, setSelectedRows] = useState<DataType[]>([]);
   const rowSelection: CoolTableProps<DataType>["rowSelection"] = {
     type: "checkbox",
-    rowKey: "age",
     preserveSelectedRowKeys: true, // 用于搜索框搜索改变数据后仍保留选择值
     selectedRowKeys,
     setSelectRowKeys,
@@ -43,7 +45,8 @@ const TableExample: FC<IProps> = () => {
 
   const [dataSource, setDataSource] = useState<DataType[]>([...data]);
 
-  const tableProps = {
+  const tableProps: CoolTableProps<DataType> = {
+    rowKey: "age",
     dataSource,
     columns,
     searchConfig,
@@ -52,14 +55,16 @@ const TableExample: FC<IProps> = () => {
 
   return (
     <div style={{ position: "relative" }}>
-      <div style={{ position: "absolute", zIndex: 1 }}>
+      {/* <div style={{ position: "absolute", zIndex: 1 }}>
         <Select></Select>
       </div>
       <div style={{ position: "absolute", zIndex: 1, right: 0 }}>
         <Button onClick={setSelectedRowNone}>重置勾选</Button>
         <Button onClick={() => setDataSource([...data])}>刷新数据</Button>
-      </div>
+      </div> */}
       <CoolTable {...tableProps} />
+      <EditableRowExample />
+      <EditableCoolTable />
     </div>
   );
 };

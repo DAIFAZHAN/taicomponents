@@ -8,6 +8,8 @@ import type { ReactNode, CSSProperties, Dispatch, SetStateAction } from "react";
 
 export interface CoolTableProps<T extends object> extends TableProps<T> {
   children?: ReactNode;
+  /**配置唯一key值 */
+  rowKey: keyof T & string;
   /**
    * 选择配置
    */
@@ -17,8 +19,6 @@ export interface CoolTableProps<T extends object> extends TableProps<T> {
   > & {
     /**配置单选/多选 */
     type: "checkbox" | "radio";
-    /**配置唯一key值 */
-    rowKey: keyof T & string;
     /**设置数据改变后保留选中项，在配置的搜索框的情况下请设为true */
     preserveSelectedRowKeys?: boolean;
     /**配置已选中项 */
@@ -87,7 +87,7 @@ const CoolTable = function <T extends object>(props: CoolTableProps<T>) {
 
   const tableProps: TableProps<T> = {
     dataSource: data,
-    rowKey: props.rowSelection?.rowKey,
+    rowKey: props.rowKey,
     rowSelection,
   };
 
