@@ -1,10 +1,11 @@
-import { CheckboxProps, Table } from "antd";
+import { Table } from "antd";
 import type { TableProps } from "antd";
 import type { SearchProps } from "antd/es/input";
 import Search from "antd/es/input/Search";
 import cloneDeep from "lodash/cloneDeep";
 import React, { memo, useEffect, useState } from "react";
 import type { ReactNode, CSSProperties, Dispatch, SetStateAction } from "react";
+
 export interface CoolTableProps<T extends object> extends TableProps<T> {
   children?: ReactNode;
   /**
@@ -64,6 +65,7 @@ const CoolTable = function <T extends object>(props: CoolTableProps<T>) {
     },
   };
   useEffect(() => {
+    setData(cloneDeep(props.dataSource));
     // 数据源改变时，按原先条件搜索
     searchProps?.onSearch?.(searchValue);
     // 数据源改变时，取消勾选的行
